@@ -98,11 +98,13 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 
 app.get('/api/users/:_id/logs', (req, res) => {
   const id = req.params._id
-  const filterUser = listUsers.filter((user) => user._id === id)
+  let filterUser = listUsers.filter((user) => user._id === id)
   res.json(filterUser)
+  console.log(req.query.from)
+  console.log(req.query.to)
+  console.log(req.query.limit)
   // Agregar queries FROM y TO con formato YYYY-mm-dd y LIMIT
 });
-
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
