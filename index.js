@@ -75,9 +75,10 @@ app.get('/api/users', (req, res) => {
 app.post('/api/users/:_id/exercises', (req, res) => {
   const id = req.params._id
   const filterUser = listUsers.filter((user) => user._id === id)
+  console.log(filterUser)
 
-  const userId = filterUser[0]._id
-  const username = filterUser[0].username
+  const userId = id
+  const username = "Tano"
   let date
 
   if(req.body.date) {
