@@ -93,6 +93,7 @@ app.post('/api/users/:_id/exercises', (req, res) => {
     duration: req.body.duration,
     description: req.body.description
   }
+  console.log(user)
   res.json(user)
 });
 
