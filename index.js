@@ -4,7 +4,7 @@ const cors = require('cors')
 const { v4: uuidv4 } = require('uuid')
 require('dotenv').config()
 
-const listUsers = [
+let listUsers = [
   {
     username: "Luc",
     _id: "61204ee9f5860e05a3652gfg",
@@ -51,34 +51,28 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/users', (req, res) => {
+  const username = req.body.username
+  
   const user = {
-    username: req.body.username,
+    username,
     _id: uuidv4()
   }
+  listUsers.push(user)
   res.json(user)
 });
 
 app.get('/api/users', (req, res) => {
-  const users = [
-    {
-      username: "Luc",
-      _id: uuidv4()
-    },
-    {
-      username: "Tat",
-      _id: uuidv4()
-    },
-  ]
-  res.json(users)
+  res.json(listUsers)
 });
 
 app.post('/api/users/:_id/exercises', (req, res) => {
   const id = req.params._id
-  const filterUser = listUsers.filter((user) => user._id === id)
-  console.log(filterUser)
+  const filterUser = listUsers.find((user) => user._id === id)
+  console.log("Usuario filtrado: ", filterUser)
 
-  const userId = id
-  const username = "Tano"
+  const { log, ...rest } = filterUser
+  console.log("FILTER USER: ", filterUser)
+
   let date
 
   if(req.body.date) {
@@ -87,15 +81,29 @@ app.post('/api/users/:_id/exercises', (req, res) => {
     date = new Date().toDateString()
   }
   
-  const user = {
-    _id: userId,
-    username: username,
-    date: date,
-    duration: req.body.duration,
+  const newLog = {
+    date,
+    duration: parseInt(req.body.duration),
     description: req.body.description
   }
-  console.log(user)
-  res.json(user)
+
+  const updateUser = {
+    ...rest,
+    log: log ? log.concat(newLog) : [newLog]
+  }
+
+  listUsers = listUsers.map(user => {
+    if (user._id === updateUser._id) {
+      return {
+        updateUser,
+      };
+    }
+    return user;
+  });
+  
+
+  console.log("Usuario actualizado: ", updateUser)
+  res.json(updateUser)
 });
 
 app.get('/api/users/:_id/logs', (req, res) => {
