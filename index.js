@@ -66,18 +66,18 @@ app.get('/api/users', (req, res) => {
 });
 
 app.post('/api/users/:_id/exercises', (req, res) => {
-  const id = req.params._id
-  const filterUser = listUsers.find((user) => user._id === id)
-  console.log("Usuario filtrado: ", filterUser)
+  const userId = req.params._id
+  let filterUser = listUsers.find((user) => user._id === userId)
 
-  const { log, ...rest } = filterUser
-  console.log("FILTER USER: ", filterUser)
+  if (!filterUser) {
+    return
+  }
 
   let date
 
-  if(req.body.date) {
+  if (req.body.date) {
     date = new Date(req.body.date).toDateString()
-  }else {
+  } else {
     date = new Date().toDateString()
   }
   
@@ -87,23 +87,21 @@ app.post('/api/users/:_id/exercises', (req, res) => {
     description: req.body.description
   }
 
-  const updateUser = {
-    ...rest,
-    log: log ? log.concat(newLog) : [newLog]
+  if (!filterUser.log) {
+    filterUser["log"] = [newLog]
+  } else {
+    filterUser.log.push(newLog)
   }
 
-  listUsers = listUsers.map(user => {
-    if (user._id === updateUser._id) {
-      return {
-        updateUser,
-      };
-    }
-    return user;
-  });
-  
+  const userNewLog = {
+    username: filterUser.username,
+    _id: filterUser._id,
+    date,
+    duration: parseInt(req.body.duration),
+    description: req.body.description
+  }
 
-  console.log("Usuario actualizado: ", updateUser)
-  res.json(updateUser)
+  res.json(userNewLog)
 });
 
 app.get('/api/users/:_id/logs', (req, res) => {
@@ -115,6 +113,7 @@ app.get('/api/users/:_id/logs', (req, res) => {
   console.log(req.query.limit)
   // Agregar queries FROM y TO con formato YYYY-mm-dd y LIMIT
 });
+
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
