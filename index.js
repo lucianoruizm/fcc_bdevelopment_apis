@@ -104,14 +104,54 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   res.json(userNewLog)
 });
 
+// Queries FROM y TO con formato YYYY-mm-dd (rangos de fechas) y LIMIT (logs)
 app.get('/api/users/:_id/logs', (req, res) => {
   const id = req.params._id
-  let filterUser = listUsers.filter((user) => user._id === id)
-  res.json(filterUser)
-  console.log(req.query.from)
-  console.log(req.query.to)
-  console.log(req.query.limit)
-  // Agregar queries FROM y TO con formato YYYY-mm-dd y LIMIT
+  let filterUser = listUsers.find((user) => user._id === id)
+
+  if (!filterUser) {
+    return 
+  }
+
+  const count = filterUser.log.length
+  filterUser.count = count
+  
+  const from = req.query.from ? new Date(req.query.from) : null
+  const to = req.query.to ? new Date(req.query.to) : null
+  const limit = req.query.limit ? parseInt(req.query.limit) : null
+
+  let filteredLog = filterUser.log
+
+  if (from && to) {
+    console.log("FROM & TO")
+    filteredLog = filteredLog.filter((log) => {
+      return new Date(log.date) >= from && new Date(log.date) <= to
+    })
+  }
+
+  if (from && !to) {
+    console.log("From & !TO")
+    filteredLog = filteredLog.filter((log) => new Date(log.date) >= from)
+  }
+
+  if (to && !from) {
+    console.log("TO & !FROM")
+    filteredLog = filteredLog.filter((log) => new Date(log.date) <= to)
+  }
+
+  if (limit) {
+    console.log("LIMIT")
+    filteredLog = filteredLog.slice(0, limit)
+  }
+
+  const filteredUser = {
+    _id: filterUser._id,
+    username: filterUser.username,
+    count: filterUser.count,
+    log: filteredLog
+  }
+
+  res.json(filteredUser)
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
